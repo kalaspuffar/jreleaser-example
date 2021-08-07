@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.ea</groupId>
     <artifactId>jreleaser-example</artifactId>
-    <version>0.0.7-SNAPSHOT</version>
+    <version>0.0.7</version>
 
     <name>JReleaser Example</name>
     <description>Testing an example of JReleaser</description>
@@ -27,7 +27,7 @@
         <connection>scm:git:git@github.com:kalaspuffar/jreleaser-example.git</connection>
         <developerConnection>scm:git:git@github.com:kalaspuffar/jreleaser-example.git</developerConnection>
         <url>https://github.com/kalaspuffar/jreleaser-example</url>
-        <tag>@{project.version}</tag>
+        <tag>0.0.7</tag>
     </scm>
 
     <licenses>
