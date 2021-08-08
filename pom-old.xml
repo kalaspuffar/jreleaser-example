@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.ea</groupId>
     <artifactId>jreleaser-example</artifactId>
-    <version>0.0.8-SNAPSHOT</version>
+    <version>0.0.9</version>
 
     <name>JReleaser Example</name>
     <description>Testing an example of JReleaser</description>
@@ -20,7 +20,7 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <app.distribution.directory>${project.build.directory}</app.distribution.directory>
+        <app.distribution.directory>${project.build.directory}/distribution/app</app.distribution.directory>
     </properties>
 
     <scm>
@@ -48,22 +48,71 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.0.0</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <configuration>
+                    <mainClass>${app.main.class}</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
                 <configuration>
                     <archive>
                         <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <mainClass>${app.main.class}</mainClass>
                         </manifest>
                     </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>2.1.0</version>
+                <configuration>
+                    <assembleDirectory>${project.build.directory}/binary</assembleDirectory>
+                    <repositoryLayout>flat</repositoryLayout>
+                    <repositoryName>lib</repositoryName>
+                    <programs>
+                        <program>
+                            <mainClass>${app.main.class}</mainClass>
+                            <id>app</id>
+                        </program>
+                    </programs>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>make-distribution</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assemble</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <attach>false</attach>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                    <outputDirectory>${app.distribution.directory}</outputDirectory>
+                    <workDirectory>${project.build.directory}/assembly/work</workDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-distribution</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -71,21 +120,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
-                <configuration>
-                    <goals>pre-integration-test</goals>
-                    <preparationGoals>package</preparationGoals>
-                    <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
-                    <tagNameFormat>@{project.version}</tagNameFormat>
-                    <remoteTagging>false</remoteTagging>
-                    <localCheckout>true</localCheckout>
-                    <pushChanges>false</pushChanges>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>org.jreleaser</groupId>
                 <artifactId>jreleaser-maven-plugin</artifactId>
@@ -108,7 +142,7 @@
                                 <artifacts>
                                     <artifact>
                                         <path>
-                                            ${app.distribution.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar
+                                            ${app.distribution.directory}/${project.artifactId}-${project.version}.jar
                                         </path>
                                     </artifact>
                                 </artifacts>
